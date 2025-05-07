@@ -178,7 +178,7 @@ const Events = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:5000/api/events');
+        const res = await axios.get('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events');
         setEvents(res.data);
         setLoading(false);
       } catch (err) {
@@ -204,7 +204,7 @@ const Events = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('http://localhost:5000/api/events', formData);
+      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events', formData);
       
       Swal.fire({
         icon: 'success',
@@ -242,7 +242,7 @@ const Events = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/events/${id}`);
+          await axios.delete(`https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events/${id}`);
           setEvents(events.filter(event => event._id !== id));
           
           Swal.fire({
