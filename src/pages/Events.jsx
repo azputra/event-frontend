@@ -204,7 +204,11 @@ const Events = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events', formData);
+      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
       Swal.fire({
         icon: 'success',

@@ -235,7 +235,11 @@ const Customers = () => {
     try {
       setSubmitting(true); // Set loading state to true before submission
       
-      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers', formData);
+      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
       Swal.fire({
         icon: 'success',

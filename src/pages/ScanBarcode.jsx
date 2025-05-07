@@ -136,6 +136,10 @@ const ScanBarcode = () => {
                 const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers/verify', {
                   customerId: barcodeData.customerId,
                   eventId: selectedEvent
+                }, {
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
                 });
                 
                 console.log('API Response:', res.data);

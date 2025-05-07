@@ -187,7 +187,11 @@ const Users = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/auth/register', formData);
+      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/auth/register', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
       Swal.fire({
         icon: 'success',

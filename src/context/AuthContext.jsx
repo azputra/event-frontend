@@ -53,6 +53,10 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/auth/login', {
         email,
         password
+      },{
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       localStorage.setItem('token', res.data.token);
