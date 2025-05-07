@@ -178,7 +178,7 @@ const Events = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events');
+        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
         setEvents(res.data);
         setLoading(false);
       } catch (err) {
@@ -204,7 +204,7 @@ const Events = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events', formData, {
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/events', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -246,7 +246,7 @@ const Events = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events/${id}`);
+          await axios.delete(`https://event-backend-ko3x.onrender.com/api/events/${id}`);
           setEvents(events.filter(event => event._id !== id));
           
           Swal.fire({

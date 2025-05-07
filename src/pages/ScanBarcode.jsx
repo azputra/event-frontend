@@ -23,7 +23,7 @@ const ScanBarcode = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events');
+        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
         setEvents(res.data);
       } catch (err) {
         setError('Error fetching events: ' + (err.response?.data?.message || err.message));
@@ -133,7 +133,7 @@ const ScanBarcode = () => {
               
               // API check - validate server is available
               try {
-                const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers/verify', {
+                const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers/verify', {
                   customerId: barcodeData.customerId,
                   eventId: selectedEvent
                 }, {

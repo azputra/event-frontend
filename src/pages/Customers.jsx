@@ -203,8 +203,8 @@ const Customers = () => {
       try {
         setLoading(true);
         const [customersRes, eventsRes] = await Promise.all([
-          axios.get('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers'),
-          axios.get('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/events')
+          axios.get('https://event-backend-ko3x.onrender.com/api/customers'),
+          axios.get('https://event-backend-ko3x.onrender.com/api/events')
         ]);
         
         setCustomers(customersRes.data);
@@ -235,7 +235,7 @@ const Customers = () => {
     try {
       setSubmitting(true); // Set loading state to true before submission
       
-      const res = await axios.post('https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers', formData, {
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -277,7 +277,7 @@ const Customers = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://api-verify-peserta-event.netlify.app/.netlify/functions/api/customers/${id}`);
+          await axios.delete(`https://event-backend-ko3x.onrender.com/api/customers/${id}`);
           setCustomers(customers.filter(customer => customer._id !== id));
           
           Swal.fire({
