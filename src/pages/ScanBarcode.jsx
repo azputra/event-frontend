@@ -506,7 +506,7 @@ const ScanBarcode = () => {
                 <div 
                   id="reader" 
                   className="border border-gray-200 rounded-xl overflow-hidden shadow-md"
-                  style={{ width: '100%', minHeight: '320px' }}
+                  style={{ width: '100%' }}
                 ></div>
                 {scanning && scanStatus === 'scanning' && (
                   <div className="bg-blue-900 bg-opacity-80 text-white py-3 px-4 rounded-lg shadow-lg absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center">
