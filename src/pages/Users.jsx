@@ -187,11 +187,7 @@ const Users = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/auth/register', formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/auth/register', formData);
       
       Swal.fire({
         icon: 'success',

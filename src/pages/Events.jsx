@@ -204,11 +204,7 @@ const Events = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/events', formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/events', formData);
       
       Swal.fire({
         icon: 'success',

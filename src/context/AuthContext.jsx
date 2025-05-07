@@ -53,10 +53,6 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post('https://event-backend-ko3x.onrender.com/api/auth/login', {
         email,
         password
-      },{
-        headers: {
-          'Content-Type': 'application/json'
-        }
       });
 
       localStorage.setItem('token', res.data.token);
