@@ -1,11 +1,11 @@
-// src/pages/Customers.js (Modal Fixed Version)
+// src/pages/Pesertas.js (Modal Fixed Version)
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 
 // Completely redesigned modal component
-const AddCustomerModal = ({ isOpen, onClose, onSubmit, formData, setFormData, events, submitting }) => {
+const AddPesertaModal = ({ isOpen, onClose, onSubmit, formData, setFormData, events, submitting }) => {
   // If modal is not open, don't render anything
   if (!isOpen) return null;
   
@@ -37,7 +37,7 @@ const AddCustomerModal = ({ isOpen, onClose, onSubmit, formData, setFormData, ev
         <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-lg">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-medium text-white">
-              Tambah Customer Baru
+              Tambah Peserta Baru
             </h3>
             <button
               type="button"
@@ -169,8 +169,8 @@ const AddCustomerModal = ({ isOpen, onClose, onSubmit, formData, setFormData, ev
   );
 };
 
-const Customers = () => {
-  const [customers, setCustomers] = useState([]);
+const Pesertas = () => {
+  const [customers, setPeserta] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -207,7 +207,7 @@ const Customers = () => {
           axios.get('https://event-backend-ko3x.onrender.com/api/events')
         ]);
         
-        setCustomers(customersRes.data);
+        setPeserta(customersRes.data);
         setEvents(eventsRes.data);
         setLoading(false);
       } catch (err) {
@@ -244,12 +244,12 @@ const Customers = () => {
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: 'Customer berhasil ditambahkan',
+        text: 'Peserta berhasil ditambahkan',
         timer: 1500,
         showConfirmButton: false
       });
       
-      setCustomers([...customers, res.data]);
+      setPeserta([...customers, res.data]);
       resetForm();
       setShowModal(false);
     } catch (err) {
@@ -267,7 +267,7 @@ const Customers = () => {
   const handleDelete = async (id) => {
     Swal.fire({
       title: 'Apakah Anda yakin?',
-      text: "Customer yang dihapus tidak dapat dikembalikan!",
+      text: "Peserta yang dihapus tidak dapat dikembalikan!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -278,12 +278,12 @@ const Customers = () => {
       if (result.isConfirmed) {
         try {
           await axios.delete(`https://event-backend-ko3x.onrender.com/api/customers/${id}`);
-          setCustomers(customers.filter(customer => customer._id !== id));
+          setPeserta(customers.filter(customer => customer._id !== id));
           
           Swal.fire({
             icon: 'success',
             title: 'Dihapus!',
-            text: 'Customer berhasil dihapus.',
+            text: 'Peserta berhasil dihapus.',
             timer: 1500,
             showConfirmButton: false
           });
@@ -299,7 +299,7 @@ const Customers = () => {
   };
 
   // Filter function
-  const filteredCustomers = customers.filter(customer => {
+  const filteredPeserta = customers.filter(customer => {
     const textMatch = filterText === '' || 
                       customer.nama.toLowerCase().includes(filterText.toLowerCase()) ||
                       customer.email.toLowerCase().includes(filterText.toLowerCase()) ||
@@ -318,8 +318,8 @@ const Customers = () => {
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredCustomers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const currentItems = filteredPeserta.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredPeserta.length / itemsPerPage);
 
   // Page change handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -331,7 +331,7 @@ const Customers = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold mb-4 md:mb-0">Daftar Customer</h1>
+        <h1 className="text-2xl font-bold mb-4 md:mb-0">Daftar Peserta</h1>
         
         {isAdmin && (
           <button
@@ -341,7 +341,7 @@ const Customers = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
-            Tambah Customer
+            Tambah Peserta
           </button>
         )}
       </div>
@@ -352,8 +352,8 @@ const Customers = () => {
         </div>
       )}
       
-      {/* Add Customer Modal */}
-      <AddCustomerModal 
+      {/* Add Peserta Modal */}
+      <AddPesertaModal 
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
@@ -503,11 +503,11 @@ const Customers = () => {
       </div>
       
       {/* Pagination */}
-      {filteredCustomers.length > 0 && (
+      {filteredPeserta.length > 0 && (
         <div className="flex flex-col sm:flex-row justify-between items-center mt-6">
           <div className="mb-4 sm:mb-0">
             <span className="text-sm text-gray-700">
-              Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredCustomers.length)} dari {filteredCustomers.length} data
+              Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredPeserta.length)} dari {filteredPeserta.length} data
             </span>
           </div>
           
@@ -596,4 +596,4 @@ const Customers = () => {
   );
 };
 
-export default Customers;
+export default Pesertas;

@@ -11,6 +11,7 @@ import Events from './pages/Events';
 import Customers from './pages/Customers';
 import Users from './pages/Users';
 import ScanBarcode from './pages/ScanBarcode';
+import EventRegistration from './pages/EventRegistration';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -45,6 +46,10 @@ const App = () => {
           
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/register/:slug"
+              element={<EventRegistration />}
+            />
             
             <Route
               path="/"

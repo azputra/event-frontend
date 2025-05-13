@@ -2,6 +2,45 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import RegistrationLinkDisplay from '../components/RegistrationLinkDisplay';
+
+// Create a simpler color picker component
+const ColorPicker = ({ formData, setFormData }) => {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Warna Background
+      </label>
+      <div className="flex items-center">
+        <input
+          type="color"
+          name="backgroundColor"
+          value={formData.backgroundColor || '#ffffff'}
+          onChange={(e) => setFormData({
+            ...formData,
+            backgroundColor: e.target.value
+          })}
+          className="h-10 w-10 border-0 p-0 mr-2"
+        />
+        <input
+          type="text"
+          value={formData.backgroundColor || '#ffffff'}
+          onChange={(e) => setFormData({
+            ...formData,
+            backgroundColor: e.target.value
+          })}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          placeholder="#RRGGBB"
+          pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+        />
+      </div>
+      <div 
+        className="mt-2 h-12 w-full rounded-md border border-gray-300" 
+        style={{ backgroundColor: formData.backgroundColor }}
+      ></div>
+    </div>
+  );
+};
 
 // Create a new modal component for adding events
 const AddEventModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submitting }) => {
@@ -57,6 +96,7 @@ const AddEventModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submi
             onSubmit(e);
           }} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Existing form fields */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nama Event
@@ -101,7 +141,10 @@ const AddEventModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submi
                 />
               </div>
               
-              <div>
+              {/* Add the ColorPicker component */}
+              <ColorPicker formData={formData} setFormData={setFormData} />
+              
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Deskripsi
                 </label>
@@ -162,7 +205,8 @@ const Events = () => {
     nama: '',
     tanggal: '',
     lokasi: '',
-    deskripsi: ''
+    deskripsi: '',
+    backgroundColor: '#ffffff'
   });
   const [submitting, setSubmitting] = useState(false);
   
@@ -195,7 +239,8 @@ const Events = () => {
       nama: '',
       tanggal: '',
       lokasi: '',
-      deskripsi: ''
+      deskripsi: '',
+      backgroundColor: '#ffffff'
     });
   };
 
@@ -312,6 +357,36 @@ const Events = () => {
   
   // Page change handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Function to determine event status
+  const getEventStatus = (eventDate) => {
+    const date = new Date(eventDate);
+    const today = new Date();
+    
+    // Reset hours, minutes, seconds and milliseconds for accurate date comparison
+    const eventDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    if (eventDay.getTime() === todayDay.getTime()) {
+      return {
+        label: 'Berlangsung',
+        className: 'bg-green-100 text-green-800',
+        upcoming: true
+      };
+    } else if (eventDay > todayDay) {
+      return {
+        label: 'Mendatang',
+        className: 'bg-blue-100 text-blue-800',
+        upcoming: true
+      };
+    } else {
+      return {
+        label: 'Selesai',
+        className: 'bg-gray-100 text-gray-800',
+        upcoming: false
+      };
+    }
+  };
 
   if (loading) {
     return (
@@ -452,16 +527,17 @@ const Events = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {currentItems.map((event) => {
-            const eventDate = new Date(event.tanggal);
-            const today = new Date();
-            const isUpcoming = eventDate >= today;
+            const status = getEventStatus(event.tanggal);
             
             return (
               <div 
                 key={event._id} 
                 className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border-l-4 ${
-                  isUpcoming ? 'border-blue-500' : 'border-gray-400'
+                  status.upcoming ? 'border-blue-500' : 'border-gray-400'
                 }`}
+                style={{
+                  backgroundColor: event.backgroundColor ? `${event.backgroundColor}15` : undefined // 15 for 10% opacity
+                }}
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start">
@@ -472,7 +548,7 @@ const Events = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <span className="text-sm">
-                          {eventDate.toLocaleDateString('id-ID', { 
+                          {new Date(event.tanggal).toLocaleDateString('id-ID', { 
                             weekday: 'long', 
                             year: 'numeric', 
                             month: 'long', 
@@ -489,19 +565,30 @@ const Events = () => {
                       </div>
                     </div>
                     <span 
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        isUpcoming 
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${status.className}`}
                     >
-                      {isUpcoming ? 'Mendatang' : 'Selesai'}
+                      {status.label}
                     </span>
                   </div>
                   
                   {event.deskripsi && (
                     <div className="mt-4 border-t border-gray-100 pt-4">
                       <p className="text-gray-600 text-sm line-clamp-3">{event.deskripsi}</p>
+                    </div>
+                  )}
+                  
+                  {status.upcoming && (
+                    <div className="mt-4">
+                      <a 
+                        href={`/register/${event.registrationSlug}`}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-md shadow-sm hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Daftar Event
+                      </a>
+                      <RegistrationLinkDisplay event={event} />
                     </div>
                   )}
                   

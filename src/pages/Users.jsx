@@ -98,6 +98,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submit
                 >
                   <option value="admin">Admin</option>
                   <option value="petugas">Petugas</option>
+                  <option value="viewer">Viewer</option>
                 </select>
               </div>
             </div>
@@ -339,6 +340,7 @@ const Users = () => {
               <option value="">Semua Role</option>
               <option value="admin">Admin</option>
               <option value="petugas">Petugas</option>
+              <option value="viewer">Viewer</option>
             </select>
           </div>
         </div>

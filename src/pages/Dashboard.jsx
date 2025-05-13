@@ -28,8 +28,8 @@ const Dashboard = () => {
                 to="/customers"
                 className="bg-green-100 p-6 rounded-lg shadow hover:shadow-md transition-shadow"
               >
-                <h3 className="text-lg font-semibold mb-2">Kelola Customer</h3>
-                <p className="text-gray-600">Kelola data customer dan generate barcode</p>
+                <h3 className="text-lg font-semibold mb-2">Kelola Peserta</h3>
+                <p className="text-gray-600">Kelola data peserta dan generate barcode</p>
               </Link>
               
               <Link
@@ -48,8 +48,8 @@ const Dashboard = () => {
                 to="/customers"
                 className="bg-green-100 p-6 rounded-lg shadow hover:shadow-md transition-shadow"
               >
-                <h3 className="text-lg font-semibold mb-2">Lihat Customer</h3>
-                <p className="text-gray-600">Lihat daftar customer terdaftar</p>
+                <h3 className="text-lg font-semibold mb-2">Lihat Peserta</h3>
+                <p className="text-gray-600">Lihat daftar peserta terdaftar</p>
               </Link>
               
               <Link
@@ -58,6 +58,18 @@ const Dashboard = () => {
               >
                 <h3 className="text-lg font-semibold mb-2">Scan Barcode</h3>
                 <p className="text-gray-600">Verifikasi kedatangan customer</p>
+              </Link>
+            </>
+          )}
+
+          {user?.role === 'viewer' && (
+            <>
+              <Link
+                to="/customers"
+                className="bg-green-100 p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+              >
+                <h3 className="text-lg font-semibold mb-2">Lihat Peserta</h3>
+                <p className="text-gray-600">Lihat daftar peserta terdaftar</p>
               </Link>
             </>
           )}
