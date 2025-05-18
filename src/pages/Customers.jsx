@@ -342,8 +342,8 @@ const Pesertas = () => {
       try {
         setLoading(true);
         const [customersRes, eventsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/customers'),
-          axios.get('http://localhost:5000/api/events')
+          axios.get('https://event-backend-ko3x.onrender.com/api/customers'),
+          axios.get('https://event-backend-ko3x.onrender.com/api/events')
         ]);
         
         setPeserta(customersRes.data);
@@ -386,7 +386,7 @@ const Pesertas = () => {
     try {
       setSubmitting(true); // Set loading state to true before submission
       
-      const res = await axios.post('http://localhost:5000/api/customers', formData, {
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -428,7 +428,7 @@ const Pesertas = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/customers/${id}`);
+          await axios.delete(`https://event-backend-ko3x.onrender.com/api/customers/${id}`);
           setPeserta(customers.filter(customer => customer._id !== id));
           
           Swal.fire({

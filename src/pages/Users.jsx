@@ -162,7 +162,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/users');
+        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/users');
         setUsers(res.data);
         setLoading(false);
       } catch (err) {
@@ -187,7 +187,7 @@ const Users = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/auth/register', formData);
       
       Swal.fire({
         icon: 'success',
@@ -225,7 +225,7 @@ const Users = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/users/${id}`);
+          await axios.delete(`https://event-backend-ko3x.onrender.com/api/users/${id}`);
           setUsers(users.filter(user => user._id !== id));
           
           Swal.fire({

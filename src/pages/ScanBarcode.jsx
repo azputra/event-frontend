@@ -23,7 +23,7 @@ const ScanBarcode = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/events');
+        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
         setEvents(res.data);
       } catch (err) {
         setError('Error fetching events: ' + (err.response?.data?.message || err.message));
@@ -133,7 +133,7 @@ const ScanBarcode = () => {
               
               // API check - validate server is available
               try {
-                const res = await axios.post('http://localhost:5000/api/customers/verify', {
+                const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers/verify', {
                   customerId: barcodeData.customerId,
                   eventId: selectedEvent
                 });
