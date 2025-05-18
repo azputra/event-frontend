@@ -32,7 +32,7 @@ const Events = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
+      const res = await axios.get('https://event-backend-85661116f5a4.herokuapp.com/api/events');
       setEvents(res.data);
       setLoading(false);
     } catch (err) {
@@ -47,7 +47,7 @@ const Events = () => {
       
       if (currentEvent?._id) {
         // Update existing event
-        const res = await axios.put(`https://event-backend-ko3x.onrender.com/api/events/${currentEvent._id}`, eventData);
+        const res = await axios.put(`https://event-backend-85661116f5a4.herokuapp.com/api/events/${currentEvent._id}`, eventData);
         
         // Update events list
         setEvents(events.map(event => event._id === currentEvent._id ? res.data : event));
@@ -61,7 +61,7 @@ const Events = () => {
         });
       } else {
         // Create new event
-        const res = await axios.post('https://event-backend-ko3x.onrender.com/api/events', eventData);
+        const res = await axios.post('https://event-backend-85661116f5a4.herokuapp.com/api/events', eventData);
         
         // Add to events list
         setEvents([...events, res.data]);
@@ -102,7 +102,7 @@ const Events = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://event-backend-ko3x.onrender.com/api/events/${id}`);
+          await axios.delete(`https://event-backend-85661116f5a4.herokuapp.com/api/events/${id}`);
           setEvents(events.filter(event => event._id !== id));
           
           Swal.fire({
@@ -365,7 +365,7 @@ const Events = () => {
                   <div 
                     className="h-40 w-full bg-cover bg-center"
                     style={{
-                      backgroundImage: `url(https://event-backend-ko3x.onrender.com/api/events/image/${event._id})`,
+                      backgroundImage: `url(https://event-backend-85661116f5a4.herokuapp.com/api/events/image/${event._id})`,
                     }}
                   >
                     <div 

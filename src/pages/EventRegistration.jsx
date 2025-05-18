@@ -28,7 +28,7 @@ const EventRegistration = () => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`https://event-backend-ko3x.onrender.com/api/events/slug/${slug}`);
+        const res = await axios.get(`https://event-backend-85661116f5a4.herokuapp.com/api/events/slug/${slug}`);
         setEvent(res.data);
         
         // Initialize formData with event ID
@@ -162,7 +162,7 @@ const EventRegistration = () => {
     try {
       setSubmitting(true);
       
-      await axios.post('https://event-backend-ko3x.onrender.com/api/customers', formData);
+      await axios.post('https://event-backend-85661116f5a4.herokuapp.com/api/customers', formData);
       
       Swal.fire({
         icon: 'success',
