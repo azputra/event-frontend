@@ -3,196 +3,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import RegistrationLinkDisplay from '../components/RegistrationLinkDisplay';
+import AddEventModal from '../components/AddEventModal'; // Import komponen baru
 
-// Create a simpler color picker component
-const ColorPicker = ({ formData, setFormData }) => {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Warna Background
-      </label>
-      <div className="flex items-center">
-        <input
-          type="color"
-          name="backgroundColor"
-          value={formData.backgroundColor || '#ffffff'}
-          onChange={(e) => setFormData({
-            ...formData,
-            backgroundColor: e.target.value
-          })}
-          className="h-10 w-10 border-0 p-0 mr-2"
-        />
-        <input
-          type="text"
-          value={formData.backgroundColor || '#ffffff'}
-          onChange={(e) => setFormData({
-            ...formData,
-            backgroundColor: e.target.value
-          })}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          placeholder="#RRGGBB"
-          pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
-        />
-      </div>
-      <div 
-        className="mt-2 h-12 w-full rounded-md border border-gray-300" 
-        style={{ backgroundColor: formData.backgroundColor }}
-      ></div>
-    </div>
-  );
-};
-
-// Create a new modal component for adding events
-const AddEventModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submitting }) => {
-  // If modal is not open, don't render anything
-  if (!isOpen) return null;
-  
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  // Prevent clicks inside the modal from closing it
-  const stopPropagation = (e) => {
-    e.stopPropagation();
-  };
-
-  return (
-    // Fixed overlay that covers the entire screen
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs"
-      onClick={onClose}
-    >
-      {/* Modal container - stop propagation to prevent closing when clicking inside */}
-      <div 
-        className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto animate-fadeIn"
-        onClick={stopPropagation}
-      >
-        {/* Modal Header with gradient */}
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-medium text-white">
-              Tambah Event Baru
-            </h3>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-white rounded-md hover:text-gray-200 focus:outline-none"
-              disabled={submitting}
-            >
-              <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        {/* Modal Body */}
-        <div className="px-6 py-4">
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            onSubmit(e);
-          }} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Existing form fields */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Event
-                </label>
-                <input
-                  type="text"
-                  name="nama"
-                  value={formData.nama}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Masukkan nama event"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal
-                </label>
-                <input
-                  type="date"
-                  name="tanggal"
-                  value={formData.tanggal}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lokasi
-                </label>
-                <input
-                  type="text"
-                  name="lokasi"
-                  value={formData.lokasi}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Masukkan lokasi event"
-                />
-              </div>
-              
-              {/* Add the ColorPicker component */}
-              <ColorPicker formData={formData} setFormData={setFormData} />
-              
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi
-                </label>
-                <textarea
-                  name="deskripsi"
-                  value={formData.deskripsi}
-                  onChange={handleInputChange}
-                  rows="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Deskripsi event (opsional)"
-                ></textarea>
-              </div>
-            </div>
-            
-            {/* Modal Footer */}
-            <div className="flex justify-end pt-4 mt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 mr-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                disabled={submitting}
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 border border-transparent rounded-md shadow-sm hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center"
-              >
-                {submitting ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Menyimpan...
-                  </>
-                ) : (
-                  'Simpan Event'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
+// Komponen ColorPicker pindah ke file terpisah components/ColorPicker.js
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -201,13 +14,7 @@ const Events = () => {
   
   // Form state
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    nama: '',
-    tanggal: '',
-    lokasi: '',
-    deskripsi: '',
-    backgroundColor: '#ffffff'
-  });
+  const [currentEvent, setCurrentEvent] = useState(null); // Untuk edit event
   const [submitting, setSubmitting] = useState(false);
   
   // Search state
@@ -219,56 +26,64 @@ const Events = () => {
   const [itemsPerPage, setItemsPerPage] = useState(6);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
-        setEvents(res.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching events');
-        setLoading(false);
-      }
-    };
-    
     fetchEvents();
   }, []);
 
-  const resetForm = () => {
-    setFormData({
-      nama: '',
-      tanggal: '',
-      lokasi: '',
-      deskripsi: '',
-      backgroundColor: '#ffffff'
-    });
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('http://localhost:5000/api/events');
+      setEvents(res.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching events');
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (eventData) => {
     try {
       setSubmitting(true);
-      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/events', formData);
       
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Event baru telah ditambahkan',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      if (currentEvent?._id) {
+        // Update existing event
+        const res = await axios.put(`http://localhost:5000/api/events/${currentEvent._id}`, eventData);
+        
+        // Update events list
+        setEvents(events.map(event => event._id === currentEvent._id ? res.data : event));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Event berhasil diperbarui',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } else {
+        // Create new event
+        const res = await axios.post('http://localhost:5000/api/events', eventData);
+        
+        // Add to events list
+        setEvents([...events, res.data]);
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Event baru telah ditambahkan',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
       
-      setEvents([...events, res.data]);
-      resetForm();
-      setShowModal(false);
+      // Close modal and reset
+      closeModal();
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Gagal!',
-        text: err.response?.data?.message || 'Error creating event'
+        text: err.response?.data?.message || 'Error processing event'
       });
-      setError('Error creating event');
+      setError('Error processing event');
     } finally {
       setSubmitting(false);
     }
@@ -287,7 +102,7 @@ const Events = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://event-backend-ko3x.onrender.com/api/events/${id}`);
+          await axios.delete(`http://localhost:5000/api/events/${id}`);
           setEvents(events.filter(event => event._id !== id));
           
           Swal.fire({
@@ -306,6 +121,16 @@ const Events = () => {
         }
       }
     });
+  };
+  
+  const handleEdit = (event) => {
+    setCurrentEvent(event);
+    setShowModal(true);
+  };
+  
+  const closeModal = () => {
+    setShowModal(false);
+    setCurrentEvent(null);
   };
   
   // Filter & search function
@@ -433,13 +258,9 @@ const Events = () => {
       {/* Add Event Modal */}
       <AddEventModal 
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          resetForm();
-        }}
+        onClose={closeModal}
         onSubmit={handleSubmit}
-        formData={formData}
-        setFormData={setFormData}
+        initialData={currentEvent || {}}
         submitting={submitting}
       />
       
@@ -539,6 +360,29 @@ const Events = () => {
                   backgroundColor: event.backgroundColor ? `${event.backgroundColor}15` : undefined // 15 for 10% opacity
                 }}
               >
+                {/* Tambahkan display gambar jika ada */}
+                {event.hasBackgroundImage && (
+                  <div 
+                    className="h-40 w-full bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(http://localhost:5000/api/events/image/${event._id})`,
+                    }}
+                  >
+                    <div 
+                      className="h-full w-full flex items-end justify-end p-2" 
+                      style={{
+                        background: `linear-gradient(transparent, ${event.backgroundColor || '#3b82f6'}80)`
+                      }}
+                    >
+                      <span 
+                        className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${status.upcoming ? 'bg-blue-500' : 'bg-gray-400'}`}
+                      >
+                        {status.label}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <div>
@@ -564,11 +408,14 @@ const Events = () => {
                         <span className="text-sm">{event.lokasi}</span>
                       </div>
                     </div>
-                    <span 
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${status.className}`}
-                    >
-                      {status.label}
-                    </span>
+                    
+                    {!event.hasBackgroundImage && (
+                      <span 
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${status.className}`}
+                      >
+                        {status.label}
+                      </span>
+                    )}
                   </div>
                   
                   {event.deskripsi && (
@@ -579,20 +426,21 @@ const Events = () => {
                   
                   {status.upcoming && (
                     <div className="mt-4">
-                      <a 
-                        href={`/register/${event.registrationSlug}`}
-                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-md shadow-sm hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Daftar Event
-                      </a>
                       <RegistrationLinkDisplay event={event} />
                     </div>
                   )}
                   
-                  <div className="flex justify-end mt-6">
+                  <div className="flex justify-end mt-6 gap-4">
+                    <button
+                      onClick={() => handleEdit(event)}
+                      className="ml-2 text-blue-500 hover:text-blue-700 transition-colors inline-flex items-center"
+                    >
+                      <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15.9a2 2 0 01-.707.707l-4 1a2 2 0 01-2.414-2.414l1-4a2 2 0 01.707-.707z" />
+                      </svg>
+                      Edit
+                    </button>
+
                     <button
                       onClick={() => handleDelete(event._id)}
                       className="text-red-500 hover:text-red-700 transition-colors inline-flex items-center"

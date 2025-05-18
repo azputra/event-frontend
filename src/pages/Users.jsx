@@ -59,10 +59,9 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, formData, setFormData, submit
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  Email / Username
                 </label>
                 <input
-                  type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
@@ -163,7 +162,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/users');
+        const res = await axios.get('http://localhost:5000/api/users');
         setUsers(res.data);
         setLoading(false);
       } catch (err) {
@@ -188,7 +187,7 @@ const Users = () => {
     
     try {
       setSubmitting(true);
-      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/auth/register', formData);
+      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
       
       Swal.fire({
         icon: 'success',
@@ -226,7 +225,7 @@ const Users = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://event-backend-ko3x.onrender.com/api/users/${id}`);
+          await axios.delete(`http://localhost:5000/api/users/${id}`);
           setUsers(users.filter(user => user._id !== id));
           
           Swal.fire({
@@ -317,13 +316,13 @@ const Users = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Cari Email
+              Cari Email / Username
             </label>
             <input
               type="text"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              placeholder="Email pengguna"
+              placeholder="Email / username pengguna"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -353,7 +352,7 @@ const Users = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  Email / Username
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Role

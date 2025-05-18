@@ -8,14 +8,51 @@ import Swal from 'sweetalert2';
 const AddPesertaModal = ({ isOpen, onClose, onSubmit, formData, setFormData, events, submitting }) => {
   // If modal is not open, don't render anything
   if (!isOpen) return null;
+
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [customFields, setCustomFields] = useState([]);
+
+  useEffect(() => {
+    if (formData.event) {
+      const event = events.find(e => e._id === formData.event);
+      setSelectedEvent(event);
+      setCustomFields(event?.customFields || []);
+    } else {
+      setSelectedEvent(null);
+      setCustomFields([]);
+    }
+  }, [formData.event, events]);
+
   
   const handleInputChange = (e) => {
-    console.log('Input change detected:', e.target.name, e.target.value);
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value, type, checked } = e.target;
+    
+    // Handle checkboxes (multiple selection)
+    if (type === 'checkbox') {
+      const fieldId = name.split('-')[0]; // Format: fieldId-optionIndex
+      const updatedValues = [...(formData[fieldId] || [])];
+      
+      if (checked) {
+        updatedValues.push(value);
+      } else {
+        const index = updatedValues.indexOf(value);
+        if (index > -1) {
+          updatedValues.splice(index, 1);
+        }
+      }
+      
+      setFormData({
+        ...formData,
+        [fieldId]: updatedValues
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
+
 
   // Prevent clicks inside the modal from closing it
   const stopPropagation = (e) => {
@@ -28,13 +65,12 @@ const AddPesertaModal = ({ isOpen, onClose, onSubmit, formData, setFormData, eve
       className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs"
       onClick={onClose}
     >
-      {/* Modal container - stop propagation to prevent closing when clicking inside */}
       <div 
-        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fadeIn md:min-w-[600px]"
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fadeIn md:min-w-[600px] max-h-[90vh] overflow-y-auto"
         onClick={stopPropagation}
       >
         {/* Modal Header with gradient */}
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-lg">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-lg sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-medium text-white">
               Tambah Peserta Baru
@@ -57,6 +93,7 @@ const AddPesertaModal = ({ isOpen, onClose, onSubmit, formData, setFormData, eve
             e.preventDefault();
             onSubmit(e);
           }} className="space-y-4">
+            {/* Fixed Fields */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700">
@@ -135,6 +172,108 @@ const AddPesertaModal = ({ isOpen, onClose, onSubmit, formData, setFormData, eve
               </div>
             </div>
             
+            {/* Custom Fields */}
+            {customFields.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Informasi Tambahan</h3>
+                
+                <div className="space-y-4">
+                  {customFields.map((field) => (
+                    <div key={field.fieldId}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {field.label}
+                        {field.required && <span className="text-red-500"> *</span>}
+                      </label>
+                      
+                      {field.type === 'text' && (
+                        <input
+                          type="text"
+                          name={field.fieldId}
+                          value={formData[field.fieldId] || ''}
+                          onChange={handleInputChange}
+                          required={field.required}
+                          placeholder={field.placeholder}
+                          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      )}
+                      
+                      {field.type === 'textarea' && (
+                        <textarea
+                          name={field.fieldId}
+                          value={formData[field.fieldId] || ''}
+                          onChange={handleInputChange}
+                          required={field.required}
+                          placeholder={field.placeholder}
+                          rows="3"
+                          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        ></textarea>
+                      )}
+                      
+                      {field.type === 'select' && (
+                        <select
+                          name={field.fieldId}
+                          value={formData[field.fieldId] || ''}
+                          onChange={handleInputChange}
+                          required={field.required}
+                          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">{field.placeholder || 'Pilih...'}</option>
+                          {field.options.map((option, index) => (
+                            <option key={index} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      
+                      {field.type === 'radio' && (
+                        <div className="mt-2 space-y-2">
+                          {field.options.map((option, index) => (
+                            <div key={index} className="flex items-center">
+                              <input
+                                id={`${field.fieldId}-${index}`}
+                                name={field.fieldId}
+                                type="radio"
+                                value={option}
+                                checked={formData[field.fieldId] === option}
+                                onChange={handleInputChange}
+                                required={field.required && !formData[field.fieldId]}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                              />
+                              <label htmlFor={`${field.fieldId}-${index}`} className="ml-3 text-sm text-gray-700">
+                                {option}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {field.type === 'checkbox' && (
+                        <div className="mt-2 space-y-2">
+                          {field.options.map((option, index) => (
+                            <div key={index} className="flex items-center">
+                              <input
+                                id={`${field.fieldId}-${index}`}
+                                name={`${field.fieldId}-${index}`}
+                                type="checkbox"
+                                value={option}
+                                checked={formData[field.fieldId]?.includes(option) || false}
+                                onChange={handleInputChange}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                              <label htmlFor={`${field.fieldId}-${index}`} className="ml-3 text-sm text-gray-700">
+                                {option}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {/* Modal Footer */}
             <div className="flex justify-end pt-4 mt-4 border-t border-gray-200">
               <button
@@ -203,8 +342,8 @@ const Pesertas = () => {
       try {
         setLoading(true);
         const [customersRes, eventsRes] = await Promise.all([
-          axios.get('https://event-backend-ko3x.onrender.com/api/customers'),
-          axios.get('https://event-backend-ko3x.onrender.com/api/events')
+          axios.get('http://localhost:5000/api/customers'),
+          axios.get('http://localhost:5000/api/events')
         ]);
         
         setPeserta(customersRes.data);
@@ -227,6 +366,18 @@ const Pesertas = () => {
       alamat: '',
       event: ''
     });
+
+    if (formData.event) {
+      const event = events.find(e => e._id === formData.event);
+      if (event && event.customFields) {
+        event.customFields.forEach(field => {
+          // Make sure to reset custom fields too
+          emptyForm[field.fieldId] = field.type === 'checkbox' ? [] : '';
+        });
+      }
+    }
+    
+    setFormData(emptyForm);
   };
 
   const handleSubmit = async (e) => {
@@ -235,7 +386,7 @@ const Pesertas = () => {
     try {
       setSubmitting(true); // Set loading state to true before submission
       
-      const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers', formData, {
+      const res = await axios.post('http://localhost:5000/api/customers', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -277,7 +428,7 @@ const Pesertas = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`https://event-backend-ko3x.onrender.com/api/customers/${id}`);
+          await axios.delete(`http://localhost:5000/api/customers/${id}`);
           setPeserta(customers.filter(customer => customer._id !== id));
           
           Swal.fire({
@@ -295,6 +446,46 @@ const Pesertas = () => {
           });
         }
       }
+    });
+  };
+
+  const showCustomFieldDetails = (customer) => {
+    if (!customer.registrationData || Object.keys(customer.registrationData).length === 0) {
+      return;
+    }
+    
+    // Find the event to get field labels
+    const event = events.find(e => e._id === customer.event._id);
+    const fieldLabels = {};
+    
+    if (event && event.customFields) {
+      event.customFields.forEach(field => {
+        fieldLabels[field.fieldId] = field.label;
+      });
+    }
+    
+    // Prepare custom field data
+    const customFieldsHtml = Object.entries(customer.registrationData).map(([key, value]) => {
+      const label = fieldLabels[key] || key;
+      let displayValue = value;
+      
+      if (Array.isArray(value)) {
+        displayValue = value.join(', ');
+      }
+      
+      return `<div class="mb-2">
+        <span class="font-medium">${label}:</span> 
+        <span class="text-gray-800">${displayValue}</span>
+      </div>`;
+    }).join('');
+    
+    Swal.fire({
+      title: `Info Tambahan: ${customer.nama}`,
+      html: `<div class="text-left">${customFieldsHtml}</div>`,
+      width: '32rem',
+      showConfirmButton: true,
+      confirmButtonText: 'Tutup',
+      confirmButtonColor: '#3085d6'
     });
   };
 
@@ -441,6 +632,9 @@ const Pesertas = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Info Tambahan
+                </th>
                 {isAdmin && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Aksi
@@ -451,7 +645,7 @@ const Pesertas = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 7 : 6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-4 text-center text-gray-500">
                     Tidak ada data customer
                   </td>
                 </tr>
@@ -484,6 +678,24 @@ const Pesertas = () => {
                         {customer.isVerified ? 'Terverifikasi' : 'Belum Verifikasi'}
                       </span>
                     </td>
+                    
+                    {/* Custom Fields Info */}
+                    <td className="px-6 py-4">
+                      {customer.registrationData && Object.keys(customer.registrationData).length > 0 ? (
+                        <button 
+                          onClick={() => showCustomFieldDetails(customer)}
+                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Lihat Detail
+                        </button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Tidak ada</span>
+                      )}
+                    </td>
+                    
                     {isAdmin && (
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button

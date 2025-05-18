@@ -89,7 +89,7 @@ const Login = () => {
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                  Email
+                  Email / Username
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -100,8 +100,6 @@ const Login = () => {
                   <input
                     id="email"
                     name="email"
-                    type="email"
-                    autoComplete="email"
                     required
                     className="pl-10 appearance-none block w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                     placeholder="nama@email.com"

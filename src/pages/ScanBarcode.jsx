@@ -23,7 +23,7 @@ const ScanBarcode = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get('https://event-backend-ko3x.onrender.com/api/events');
+        const res = await axios.get('http://localhost:5000/api/events');
         setEvents(res.data);
       } catch (err) {
         setError('Error fetching events: ' + (err.response?.data?.message || err.message));
@@ -133,7 +133,7 @@ const ScanBarcode = () => {
               
               // API check - validate server is available
               try {
-                const res = await axios.post('https://event-backend-ko3x.onrender.com/api/customers/verify', {
+                const res = await axios.post('http://localhost:5000/api/customers/verify', {
                   customerId: barcodeData.customerId,
                   eventId: selectedEvent
                 });
@@ -250,7 +250,7 @@ const ScanBarcode = () => {
     
     switch (scanStatus) {
       case 'scanning':
-        message = 'Memindai... Arahkan kamera ke barcode customer';
+        message = 'Memindai... Arahkan kamera ke barcode';
         className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-700';
         icon = (
           <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -513,7 +513,7 @@ const ScanBarcode = () => {
                     <svg className="animate-pulse w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <p className="text-xs">Arahkan kamera ke barcode customer</p>
+                    <p className="text-xs">Arahkan kamera ke barcode</p>
                   </div>
                 )}
               </div>
