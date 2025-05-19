@@ -13,7 +13,8 @@ const EventRegistration = () => {
   const [error, setError] = useState('');
   const [eventClosed, setEventClosed] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
-  
+  const [participantCount, setParticipantCount] = useState(0);
+
   // Initialize formData with empty values for fixed fields
   const [formData, setFormData] = useState({
     nama: '',
@@ -30,6 +31,13 @@ const EventRegistration = () => {
         setLoading(true);
         const res = await axios.get(`https://event-backend-85661116f5a4.herokuapp.com/api/events/slug/${slug}`);
         setEvent(res.data);
+
+        const countRes = await axios.get(`https://event-backend-85661116f5a4.herokuapp.com/api/events/${res.data._id}/count`);
+        setParticipantCount(countRes.data.count);
+
+        if (countRes.data.count >= 1700) {
+          setEventClosed(true);
+        }
         
         // Initialize formData with event ID
         setFormData(prevData => ({
@@ -514,7 +522,7 @@ const EventRegistration = () => {
                   </div>
                   <h2 className="text-3xl font-bold text-gray-800 mb-4">Pendaftaran Ditutup</h2>
                   <p className="text-gray-600 mb-6">
-                    Maaf, pendaftaran untuk event ini telah ditutup karena event telah selesai.
+                    Maaf, pendaftaran untuk event ini telah ditutup karena telah mencapai batas / event telah selesai.
                   </p>
                   <button
                     onClick={() => navigate('/')}
