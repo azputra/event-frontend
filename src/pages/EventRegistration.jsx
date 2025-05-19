@@ -167,12 +167,13 @@ const EventRegistration = () => {
       Swal.fire({
         icon: 'success',
         title: 'Pendaftaran Berhasil!',
-        text: 'Terima kasih telah mendaftar untuk event ini. Kami telah mengirimkan informasi lebih lanjut melalui whatsapp.',
+        text: 'Terima kasih telah mendaftar untuk event ini. Kami telah mengirimkan informasi lebih lanjut melalui email/whatsapp.',
         confirmButtonText: 'OK'
       }).then(() => {
         navigate('/registration-success', { 
           state: { 
             noHp: formData.noHp,
+            email: event.email, 
             eventName: event.nama 
           }
         });

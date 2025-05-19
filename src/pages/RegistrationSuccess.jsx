@@ -6,12 +6,12 @@ import confetti from 'canvas-confetti';
 const RegistrationSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { noHp, eventName } = location.state || {};
+  const { noHp, email, eventName } = location.state || {};
 
   // Trigger confetti animation when component mounts
   useEffect(() => {
     // Check if we have the required state data
-    if (!noHp || !eventName) {
+    if (!noHp || !eventName || !email) {
       return;
     }
 
@@ -42,10 +42,10 @@ const RegistrationSuccess = () => {
     };
 
     frame();
-  }, [noHp, eventName]);
+  }, [noHp, eventName, email]);
 
   // Handle if accessed directly without state
-  if (!noHp || !eventName) {
+  if (!noHp || !eventName || !email) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md">
@@ -99,12 +99,12 @@ const RegistrationSuccess = () => {
               </div>
               <div className="ml-3 flex-1 md:flex md:justify-between">
                 <p className="text-sm text-blue-700">
-                  Detail pendaftaran telah dikirim ke whatsapp Anda:
+                  Detail pendaftaran telah dikirim ke email / whatsapp Anda:
                 </p>
               </div>
             </div>
             <p className="mt-2 text-center font-mono text-blue-800 bg-blue-100 py-2 px-3 rounded border border-blue-200">
-              {noHp}
+              {email} / {noHp}
             </p>
           </div>
           
