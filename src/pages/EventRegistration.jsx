@@ -173,7 +173,7 @@ const EventRegistration = () => {
         navigate('/registration-success', { 
           state: { 
             noHp: formData.noHp,
-            email: event.email, 
+            email: formData.email, 
             eventName: event.nama 
           }
         });

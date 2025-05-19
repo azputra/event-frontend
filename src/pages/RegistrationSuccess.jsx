@@ -11,7 +11,7 @@ const RegistrationSuccess = () => {
   // Trigger confetti animation when component mounts
   useEffect(() => {
     // Check if we have the required state data
-    if (!noHp || !eventName || !email) {
+    if (!noHp || !eventName) {
       return;
     }
 
@@ -45,7 +45,7 @@ const RegistrationSuccess = () => {
   }, [noHp, eventName, email]);
 
   // Handle if accessed directly without state
-  if (!noHp || !eventName || !email) {
+  if (!noHp || !eventName) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md">
