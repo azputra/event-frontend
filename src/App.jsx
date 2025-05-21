@@ -13,6 +13,7 @@ import Users from './pages/Users';
 import ScanBarcode from './pages/ScanBarcode';
 import EventRegistration from './pages/EventRegistration';
 import RegistrationSuccess from './pages/RegistrationSuccess';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -52,6 +53,7 @@ const App = () => {
               element={<EventRegistration />}
             />
             <Route path="/registration-success" element={<RegistrationSuccess />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             
             <Route
               path="/"

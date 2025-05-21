@@ -24,6 +24,31 @@ const EventRegistration = () => {
   });
   
   const [submitting, setSubmitting] = useState(false);
+
+  // Tambahkan di komponen EventRegistration useEffect
+  useEffect(() => {
+    // Meta tag untuk search engine
+    const metaTags = [
+      { name: "description", content: "Form pendaftaran event gratis, tidak meminta data sensitif" },
+      { name: "purpose", content: "Event registration form with transparent data collection" },
+      { name: "keywords", content: "event registration, free event, seminar registration" },
+      { name: "robots", content: "index, follow" }
+    ];
+    
+    metaTags.forEach(tag => {
+      const metaTag = document.createElement('meta');
+      metaTag.name = tag.name;
+      metaTag.content = tag.content;
+      document.head.appendChild(metaTag);
+    });
+    
+    return () => {
+      metaTags.forEach(tag => {
+        const element = document.querySelector(`meta[name="${tag.name}"]`);
+        if (element) document.head.removeChild(element);
+      });
+    };
+  }, []);
   
   useEffect(() => {
     const fetchEvent = async () => {

@@ -8,6 +8,33 @@ import successAnimation from '../assets/success.json';
 import errorAnimation from '../assets/error.json';
 import waitingAnimation from '../assets/searching.json';
 
+// Komponen untuk meminta izin kamera dengan informasi yang jelas
+const CameraPermissionRequest = ({ onApprove }) => {
+  return (
+    <div className="bg-white border border-blue-100 rounded-xl p-6 mb-6 shadow-md">
+      <h3 className="text-xl font-semibold text-blue-800 mb-3">Izin Kamera Diperlukan</h3>
+      <p className="text-gray-600 mb-4">
+        Aplikasi ini membutuhkan akses kamera untuk memindai barcode tiket event. Kamera hanya digunakan untuk membaca barcode dan tidak ada data gambar yang disimpan.
+      </p>
+      <ul className="list-disc pl-5 mb-4 text-gray-600">
+        <li>Data kamera hanya digunakan untuk memindai barcode</li>
+        <li>Tidak ada gambar yang disimpan atau dikirim ke server</li>
+        <li>Anda dapat mencabut izin kapan saja melalui pengaturan browser</li>
+      </ul>
+      <button
+        onClick={onApprove}
+        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all flex items-center justify-center w-full"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        Izinkan Akses Kamera
+      </button>
+    </div>
+  );
+};
+
 const ScanBarcode = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState('');
@@ -18,6 +45,9 @@ const ScanBarcode = () => {
   const [cameraId, setCameraId] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [scanStatus, setScanStatus] = useState('');
+  const [cameraPermissionRequested, setCameraPermissionRequested] = useState(false);
+  const [showManualVerification, setShowManualVerification] = useState(false);
+  const [manualCustomerId, setManualCustomerId] = useState('');
   const animationRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +63,19 @@ const ScanBarcode = () => {
     
     fetchEvents();
     checkCameras();
+
+    // Tambahkan meta tag untuk menunjukkan bahwa kamera digunakan dengan aman
+    const cameraUsageMetaTag = document.createElement('meta');
+    cameraUsageMetaTag.name = "camera-usage";
+    cameraUsageMetaTag.content = "Aplikasi ini menggunakan kamera hanya untuk memindai barcode dengan izin pengguna. Tidak ada data kamera yang disimpan.";
+    document.head.appendChild(cameraUsageMetaTag);
+
+    // Bersihkan meta tag saat component unmount
+    return () => {
+      if (cameraUsageMetaTag) {
+        document.head.removeChild(cameraUsageMetaTag);
+      }
+    };
   }, []);
 
   const checkCameras = async () => {
@@ -44,17 +87,26 @@ const ScanBarcode = () => {
       } else {
         setError('No cameras found on this device');
         setScanStatus('error');
+        // Tampilkan opsi verifikasi manual jika tidak ada kamera
+        setShowManualVerification(true);
       }
     } catch (err) {
       console.error('Error getting cameras:', err);
       setError('Unable to access camera: ' + (err.message || 'Please check camera permissions'));
       setScanStatus('error');
+      // Tampilkan opsi verifikasi manual jika akses kamera gagal
+      setShowManualVerification(true);
     }
   };
 
   useEffect(() => {
     return () => {
       stopScanner();
+      // Reset semua state saat komponen unmount
+      setScanResult(null);
+      setError('');
+      setScanStatus('');
+      setCameraPermissionRequested(false);
     };
   }, []);
 
@@ -63,6 +115,7 @@ const ScanBarcode = () => {
     setScanResult(null);
     setError('');
     setScanStatus('');
+    setCameraPermissionRequested(false);
     if (scanning) {
       stopScanner();
     }
@@ -73,6 +126,49 @@ const ScanBarcode = () => {
     if (scanning) {
       stopScanner();
       setTimeout(() => startScanner(), 500);
+    }
+  };
+
+  // Handler untuk persetujuan akses kamera
+  const handleCameraApproval = () => {
+    setCameraPermissionRequested(true);
+    startScanner();
+  };
+
+  // Fungsi untuk menangani verifikasi manual
+  const handleManualVerification = async () => {
+    if (!manualCustomerId || !selectedEvent) {
+      setError('Silakan pilih event dan masukkan ID peserta');
+      setScanStatus('error');
+      return;
+    }
+
+    try {
+      setScanStatus('processing');
+      
+      const res = await axios.post('https://event-backend-85661116f5a4.herokuapp.com/api/customers/verify', {
+        customerId: manualCustomerId,
+        eventId: selectedEvent
+      });
+      
+      console.log('API Response:', res.data);
+      setScanResult(res.data);
+      setScanStatus(res.data.success ? 'success' : 'failed');
+    } catch (apiErr) {
+      console.error('API error:', apiErr);
+      
+      let errorMessage = 'Verifikasi gagal';
+      
+      if (apiErr.response) {
+        errorMessage = apiErr.response.data.message || 'Server error: ' + apiErr.response.status;
+      } else if (apiErr.request) {
+        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi atau status server.';
+      } else {
+        errorMessage = apiErr.message;
+      }
+      
+      setError(errorMessage);
+      setScanStatus('error');
     }
   };
 
@@ -198,6 +294,8 @@ const ScanBarcode = () => {
       setError('Error akses kamera: ' + (err.message || 'Periksa izin kamera dan coba lagi'));
       setScanStatus('error');
       setScanning(false);
+      // Tampilkan opsi verifikasi manual jika scanner gagal
+      setShowManualVerification(true);
     }
   };
 
@@ -221,6 +319,11 @@ const ScanBarcode = () => {
     setScanResult(null);
     setError('');
     setScanStatus('');
+    setCameraPermissionRequested(false);
+  };
+
+  const toggleManualVerification = () => {
+    setShowManualVerification(!showManualVerification);
   };
 
   // Get the animation based on current status
@@ -312,6 +415,17 @@ const ScanBarcode = () => {
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-blue-800 mb-2">Scan Barcode</h1>
           <p className="text-gray-600">Verifikasi kehadiran peserta event dengan scan barcode</p>
+        </div>
+        
+        {/* Banner informasi privasi */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-700 flex items-start">
+          <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p>Aplikasi ini menggunakan kamera hanya untuk memindai barcode tiket. Tidak ada data kamera yang disimpan atau dikirim ke server.</p>
+            <a href="/privacy-policy" className="text-blue-600 hover:underline mt-1 inline-block">Baca Kebijakan Privasi</a>
+          </div>
         </div>
         
         <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-100">
@@ -476,16 +590,28 @@ const ScanBarcode = () => {
           {selectedEvent && !scanResult && (
             <div className="animate-fadeIn">
               {!scanning ? (
-                <div className="flex justify-center mb-6">
-                  <button
-                    onClick={startScanner}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all flex items-center"
+                <div className="flex flex-col items-center mb-6">
+                  {!cameraPermissionRequested ? (
+                    <CameraPermissionRequest onApprove={handleCameraApproval} />
+                  ) : (
+                    <button
+                      onClick={startScanner}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all flex items-center"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      Buka Scanner
+                    </button>
+                  )}
+                  
+                  {/* Opsi untuk verifikasi manual */}
+                  <button 
+                    className="text-blue-600 hover:text-blue-800 text-sm mt-3"
+                    onClick={toggleManualVerification}
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Buka Scanner
+                    {showManualVerification ? 'Kembali ke Scan Barcode' : 'Tidak ingin menggunakan kamera? Verifikasi manual di sini'}
                   </button>
                 </div>
               ) : (
@@ -502,21 +628,49 @@ const ScanBarcode = () => {
                 </div>
               )}
               
-              <div className="w-full mx-auto relative">
-                <div 
-                  id="reader" 
-                  className="border border-gray-200 rounded-xl overflow-hidden shadow-md"
-                  style={{ width: '100%' }}
-                ></div>
-                {scanning && scanStatus === 'scanning' && (
-                  <div className="bg-blue-900 bg-opacity-80 text-white py-3 px-4 rounded-lg shadow-lg absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center">
-                    <svg className="animate-pulse w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p className="text-xs">Arahkan kamera ke barcode</p>
+              {/* Verifikasi Manual Form */}
+              {showManualVerification && !scanning && (
+                <div className="border border-gray-200 rounded-xl p-6 mb-6 shadow-md bg-gray-50">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">Verifikasi Manual</h3>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      ID Peserta
+                    </label>
+                    <input
+                      type="text"
+                      value={manualCustomerId}
+                      onChange={(e) => setManualCustomerId(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="Masukkan ID peserta"
+                    />
                   </div>
-                )}
-              </div>
+                  <button
+                    onClick={handleManualVerification}
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  >
+                    Verifikasi Manual
+                  </button>
+                </div>
+              )}
+              
+              {/* Scanner Container */}
+              {!showManualVerification && (
+                <div className="w-full mx-auto relative">
+                  <div 
+                    id="reader" 
+                    className="border border-gray-200 rounded-xl overflow-hidden shadow-md"
+                    style={{ width: '100%' }}
+                  ></div>
+                  {scanning && scanStatus === 'scanning' && (
+                    <div className="bg-blue-900 bg-opacity-80 text-white py-3 px-4 rounded-lg shadow-lg absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center">
+                      <svg className="animate-pulse w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <p className="text-xs">Arahkan kamera ke barcode</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
           
@@ -528,6 +682,37 @@ const ScanBarcode = () => {
               <p className="text-gray-600 text-center">Silakan pilih event untuk mulai memindai</p>
             </div>
           )}
+          
+          {/* Informasi Tambahan tentang Privasi dan Keamanan */}
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Informasi Keamanan</h3>
+            <ul className="text-xs text-gray-500 space-y-2">
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-green-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Aplikasi ini hanya menggunakan kamera untuk memindai barcode
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-green-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Tidak ada gambar atau video yang disimpan
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-green-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Koneksi aman menggunakan HTTPS
+              </li>
+              <li className="flex items-start">
+                <svg className="w-4 h-4 text-green-500 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Anda dapat mencabut izin kamera kapan saja melalui pengaturan browser
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
